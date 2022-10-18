@@ -8,7 +8,7 @@ pub type Vector2 = glam::Vec2;
 
 pub mod aabb;
 pub mod axis;
-pub mod bsh;
+pub mod bvh2d;
 mod utils;
 
 trait ContainedBy {

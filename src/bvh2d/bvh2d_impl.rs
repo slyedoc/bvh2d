@@ -1,5 +1,5 @@
 use crate::aabb::{Bounded, AABB};
-use crate::bsh::iter::BSHTraverseIterator;
+use crate::bvh2d::iter::BVH2dTraverseIterator;
 use crate::utils::{concatenate_vectors, joint_aabb_of_shapes, Bucket};
 use crate::Point2;
 use crate::EPSILON;
@@ -7,7 +7,7 @@ use std::f32;
 
 #[derive(Copy, Clone, Debug)]
 #[allow(clippy::upper_case_acronyms)]
-pub(crate) enum BSHNode {
+pub(crate) enum BVH2dNode {
     Leaf {
         shape_index: usize,
     },
@@ -20,13 +20,13 @@ pub(crate) enum BSHNode {
     },
 }
 
-impl BSHNode {
+impl BVH2dNode {
     #[inline]
-    const fn create_dummy() -> BSHNode {
-        BSHNode::Leaf { shape_index: 0 }
+    const fn create_dummy() -> BVH2dNode {
+        BVH2dNode::Leaf { shape_index: 0 }
     }
 
-    fn build<T: Bounded>(shapes: &[T], indices: &[usize], nodes: &mut Vec<BSHNode>) -> usize {
+    fn build<T: Bounded>(shapes: &[T], indices: &[usize], nodes: &mut Vec<BVH2dNode>) -> usize {
         // Helper function to accumulate the AABB joint and the centroids AABB
         #[inline]
         fn grow_convex_hull(convex_hull: (AABB, AABB), shape_aabb: &AABB) -> (AABB, AABB) {
@@ -49,7 +49,7 @@ impl BSHNode {
         if indices.len() == 1 {
             let shape_index = indices[0];
             let node_index = nodes.len();
-            nodes.push(BSHNode::Leaf { shape_index });
+            nodes.push(BVH2dNode::Leaf { shape_index });
             // Let the shape know the index of the node that represents it.
             return node_index;
         }
@@ -57,13 +57,13 @@ impl BSHNode {
         // From here on we handle the recursive case. This dummy is required, because the children
         // must know their parent, and it's easier to update one parent node than the child nodes.
         let node_index = nodes.len();
-        nodes.push(BSHNode::create_dummy());
+        nodes.push(BVH2dNode::create_dummy());
 
         // Find the axis along which the shapes are spread the most.
         let split_axis = centroid_bounds.largest_axis();
         let split_axis_size = centroid_bounds.max[split_axis] - centroid_bounds.min[split_axis];
 
-        // The following `if` partitions `indices` for recursively calling `BSH::build`.
+        // The following `if` partitions `indices` for recursively calling `BVH2d::build`.
         let (child_l_index, child_l_aabb, child_r_index, child_r_aabb) = if split_axis_size
             < EPSILON
         {
@@ -74,8 +74,8 @@ impl BSHNode {
             let child_r_aabb = joint_aabb_of_shapes(child_r_indices, shapes);
 
             // Proceed recursively.
-            let child_l_index = BSHNode::build(shapes, child_l_indices, nodes);
-            let child_r_index = BSHNode::build(shapes, child_r_indices, nodes);
+            let child_l_index = BVH2dNode::build(shapes, child_l_indices, nodes);
+            let child_r_index = BVH2dNode::build(shapes, child_r_indices, nodes);
             (child_l_index, child_l_aabb, child_r_index, child_r_aabb)
         } else {
             const NUM_BUCKETS: usize = 4;
@@ -128,15 +128,15 @@ impl BSHNode {
             let child_r_indices = concatenate_vectors(r_assignments);
 
             // Proceed recursively.
-            let child_l_index = BSHNode::build(shapes, &child_l_indices, nodes);
-            let child_r_index = BSHNode::build(shapes, &child_r_indices, nodes);
+            let child_l_index = BVH2dNode::build(shapes, &child_l_indices, nodes);
+            let child_r_index = BVH2dNode::build(shapes, &child_r_indices, nodes);
             (child_l_index, child_l_aabb, child_r_index, child_r_aabb)
         };
 
         // Construct the actual data structure and replace the dummy node.
         debug_assert!(!child_l_aabb.is_empty());
         debug_assert!(!child_r_aabb.is_empty());
-        nodes[node_index] = BSHNode::Node {
+        nodes[node_index] = BVH2dNode::Node {
             child_l_aabb,
             child_l_index,
             child_r_aabb,
@@ -149,20 +149,20 @@ impl BSHNode {
 
 #[allow(clippy::upper_case_acronyms)]
 #[derive(Clone, Debug)]
-pub struct BSH {
-    pub(crate) nodes: Vec<BSHNode>,
+pub struct BVH2d {
+    pub(crate) nodes: Vec<BVH2dNode>,
 }
 
-impl BSH {
-    pub fn build<Shape: Bounded>(shapes: &[Shape]) -> BSH {
+impl BVH2d {
+    pub fn build<Shape: Bounded>(shapes: &[Shape]) -> BVH2d {
         let indices = (0..shapes.len()).collect::<Vec<usize>>();
         let expected_node_count = shapes.len() * 2;
         let mut nodes = Vec::with_capacity(expected_node_count);
-        BSHNode::build(shapes, &indices, &mut nodes);
-        BSH { nodes }
+        BVH2dNode::build(shapes, &indices, &mut nodes);
+        BVH2d { nodes }
     }
 
-    pub fn contains_iterator<'a>(&'a self, point: &'a Point2) -> BSHTraverseIterator {
-        BSHTraverseIterator::new(self, point)
+    pub fn contains_iterator<'a>(&'a self, point: &'a Point2) -> BVH2dTraverseIterator {
+        BVH2dTraverseIterator::new(self, point)
     }
 }
