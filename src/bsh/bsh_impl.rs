@@ -5,7 +5,7 @@ use crate::Point2;
 use crate::EPSILON;
 use std::f32;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 #[allow(clippy::upper_case_acronyms)]
 pub(crate) enum BSHNode {
     Leaf {
@@ -149,7 +149,7 @@ impl BSHNode {
 }
 
 #[allow(clippy::upper_case_acronyms)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct BSH {
     pub(crate) nodes: Vec<BSHNode>,
 }

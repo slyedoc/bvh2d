@@ -4,7 +4,7 @@ use crate::{Point2, Vector2};
 
 use crate::axis::Axis;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 #[allow(clippy::upper_case_acronyms)]
 pub struct AABB {
     pub min: Point2,
