@@ -3,7 +3,7 @@ use crate::{ContainedBy, Point2};
 
 #[allow(clippy::upper_case_acronyms)]
 pub struct BSHTraverseIterator<'a> {
-    bvh: &'a BSH,
+    bsh: &'a BSH,
     point: &'a Point2,
     stack: [usize; 32],
     node_index: usize,
@@ -12,9 +12,9 @@ pub struct BSHTraverseIterator<'a> {
 }
 
 impl<'a> BSHTraverseIterator<'a> {
-    pub(crate) fn new(bvh: &'a BSH, point: &'a Point2) -> Self {
+    pub(crate) fn new(bsh: &'a BSH, point: &'a Point2) -> Self {
         BSHTraverseIterator {
-            bvh,
+            bsh,
             point,
             stack: [0; 32],
             node_index: 0,
@@ -38,7 +38,7 @@ impl<'a> BSHTraverseIterator<'a> {
     }
 
     fn move_left(&mut self) {
-        match self.bvh.nodes[self.node_index] {
+        match self.bsh.nodes[self.node_index] {
             BSHNode::Node {
                 child_l_index,
                 ref child_l_aabb,
@@ -58,7 +58,7 @@ impl<'a> BSHTraverseIterator<'a> {
     }
 
     fn move_right(&mut self) {
-        match self.bvh.nodes[self.node_index] {
+        match self.bsh.nodes[self.node_index] {
             BSHNode::Node {
                 child_r_index,
                 ref child_r_aabb,
@@ -94,7 +94,7 @@ impl<'a> Iterator for BSHTraverseIterator<'a> {
             } else {
                 // Go back up the stack and see if a node or leaf was pushed.
                 self.node_index = self.stack_pop();
-                match self.bvh.nodes[self.node_index] {
+                match self.bsh.nodes[self.node_index] {
                     BSHNode::Node { .. } => {
                         // If a node was pushed, now attempt to move to its right child.
                         self.move_right();

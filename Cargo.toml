@@ -4,7 +4,7 @@ description = "A fast BSH using SAH"
 version = "0.1.0"
 edition = "2021"
 readme = "README.md"
-repository = "https://github.com/mockersf/bvh"
+repository = "https://github.com/mockersf/bsh"
 documentation = "https://docs.rs/crate/bsh"
 license = "MIT"
 
