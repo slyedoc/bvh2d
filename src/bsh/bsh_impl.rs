@@ -78,8 +78,7 @@ impl BSHNode {
             let child_r_index = BSHNode::build(shapes, child_r_indices, nodes);
             (child_l_index, child_l_aabb, child_r_index, child_r_aabb)
         } else {
-            // Create six `Bucket`s, and six index assignment vector.
-            const NUM_BUCKETS: usize = 6;
+            const NUM_BUCKETS: usize = 4;
             let mut buckets = [Bucket::empty(); NUM_BUCKETS];
             let mut bucket_assignments: [Vec<usize>; NUM_BUCKETS] = Default::default();
 
