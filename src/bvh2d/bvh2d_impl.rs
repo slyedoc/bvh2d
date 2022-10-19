@@ -76,8 +76,14 @@ impl BVH2dNode {
             (child_l_index, child_l_aabb, child_r_index, child_r_aabb)
         } else {
             const NUM_BUCKETS: usize = 4;
-            let mut bucket_assignments: [Vec<usize>; NUM_BUCKETS] = Default::default();
+            const BUCKET_START_CAPACITY: usize = 20;
             let mut buckets = [Bucket::EMPTY; NUM_BUCKETS];
+            let mut bucket_assignments: [Vec<usize>; NUM_BUCKETS] = [
+                Vec::with_capacity(BUCKET_START_CAPACITY),
+                Vec::with_capacity(BUCKET_START_CAPACITY),
+                Vec::with_capacity(BUCKET_START_CAPACITY),
+                Vec::with_capacity(BUCKET_START_CAPACITY),
+            ];
 
             // In this branch the `split_axis_size` is large enough to perform meaningful splits.
             // We start by assigning the shapes to `Bucket`s.
