@@ -31,23 +31,20 @@ impl AABB {
     #[inline]
     pub(crate) fn join(&self, other: &AABB) -> AABB {
         AABB::with_bounds(
-            Point2::new(self.min.x.min(other.min.x), self.min.y.min(other.min.y)),
-            Point2::new(self.max.x.max(other.max.x), self.max.y.max(other.max.y)),
+            Point2::min(self.min, other.min),
+            Point2::max(self.max, other.max),
         )
     }
 
     #[inline]
     pub(crate) fn join_mut(&mut self, other: &AABB) {
-        self.min = Point2::new(self.min.x.min(other.min.x), self.min.y.min(other.min.y));
-        self.max = Point2::new(self.max.x.max(other.max.x), self.max.y.max(other.max.y));
+        self.min = Point2::min(self.min, other.min);
+        self.max = Point2::max(self.max, other.max);
     }
 
     #[inline]
     pub(crate) fn grow(&self, other: &Point2) -> AABB {
-        AABB::with_bounds(
-            Point2::new(self.min.x.min(other.x), self.min.y.min(other.y)),
-            Point2::new(self.max.x.max(other.x), self.max.y.max(other.y)),
-        )
+        AABB::with_bounds(Point2::min(self.min, *other), Point2::max(self.max, *other))
     }
 
     #[inline]
