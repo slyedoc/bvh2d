@@ -17,17 +17,16 @@ pub trait Bounded {
 
 impl AABB {
     #[inline]
-    pub fn with_bounds(min: Point2, max: Point2) -> AABB {
+    pub const fn with_bounds(min: Point2, max: Point2) -> AABB {
         AABB { min, max }
     }
 
-    #[inline]
-    pub(crate) const fn empty() -> AABB {
+    pub(crate) const EMPTY: AABB = {
         AABB {
             min: Point2::new(f32::INFINITY, f32::INFINITY),
             max: Point2::new(f32::NEG_INFINITY, f32::NEG_INFINITY),
         }
-    }
+    };
 
     #[inline]
     pub(crate) fn join(&self, other: &AABB) -> AABB {

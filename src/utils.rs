@@ -1,7 +1,6 @@
-//! Utilities module.
-
 use crate::aabb::{Bounded, AABB};
 
+#[inline]
 pub fn concatenate_vectors<T: Sized>(vectors: &mut [Vec<T>]) -> Vec<T> {
     let mut result = Vec::with_capacity(vectors.iter().map(|v| v.len()).sum());
     for vector in vectors.iter_mut() {
@@ -17,13 +16,12 @@ pub(crate) struct Bucket {
 }
 
 impl Bucket {
-    #[inline]
-    pub(crate) const fn empty() -> Bucket {
+    pub(crate) const EMPTY: Bucket = {
         Bucket {
             size: 0,
-            aabb: AABB::empty(),
+            aabb: AABB::EMPTY,
         }
-    }
+    };
 
     #[inline]
     pub(crate) fn add_aabb(&mut self, aabb: &AABB) {
@@ -42,7 +40,7 @@ impl Bucket {
 
 #[inline]
 pub(crate) fn joint_aabb_of_shapes<Shape: Bounded>(indices: &[usize], shapes: &[Shape]) -> AABB {
-    let mut aabb = AABB::empty();
+    let mut aabb = AABB::EMPTY;
     for index in indices {
         let shape = &shapes[*index];
         aabb.join_mut(&shape.aabb());

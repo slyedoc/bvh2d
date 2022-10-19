@@ -21,10 +21,7 @@ pub(crate) enum BVH2dNode {
 }
 
 impl BVH2dNode {
-    #[inline]
-    const fn create_dummy() -> BVH2dNode {
-        BVH2dNode::Leaf { shape_index: 0 }
-    }
+    const DUMMY: BVH2dNode = { BVH2dNode::Leaf { shape_index: 0 } };
 
     fn build<T: Bounded>(shapes: &[T], indices: &[usize], nodes: &mut Vec<BVH2dNode>) -> usize {
         // Helper function to accumulate the AABB joint and the centroids AABB
@@ -39,12 +36,6 @@ impl BVH2dNode {
             )
         }
 
-        let mut convex_hull = (AABB::empty(), AABB::empty());
-        for index in indices {
-            convex_hull = grow_convex_hull(convex_hull, &shapes[*index].aabb());
-        }
-        let (aabb_bounds, centroid_bounds) = convex_hull;
-
         // If there is only one element left, don't split anymore
         if indices.len() == 1 {
             let shape_index = indices[0];
@@ -54,10 +45,16 @@ impl BVH2dNode {
             return node_index;
         }
 
+        let mut convex_hull = (AABB::EMPTY, AABB::EMPTY);
+        for index in indices {
+            convex_hull = grow_convex_hull(convex_hull, &shapes[*index].aabb());
+        }
+        let (aabb_bounds, centroid_bounds) = convex_hull;
+
         // From here on we handle the recursive case. This dummy is required, because the children
         // must know their parent, and it's easier to update one parent node than the child nodes.
         let node_index = nodes.len();
-        nodes.push(BVH2dNode::create_dummy());
+        nodes.push(BVH2dNode::DUMMY);
 
         // Find the axis along which the shapes are spread the most.
         let split_axis = centroid_bounds.largest_axis();
@@ -79,8 +76,8 @@ impl BVH2dNode {
             (child_l_index, child_l_aabb, child_r_index, child_r_aabb)
         } else {
             const NUM_BUCKETS: usize = 4;
-            let mut buckets = [Bucket::empty(); NUM_BUCKETS];
             let mut bucket_assignments: [Vec<usize>; NUM_BUCKETS] = Default::default();
+            let mut buckets = [Bucket::EMPTY; NUM_BUCKETS];
 
             // In this branch the `split_axis_size` is large enough to perform meaningful splits.
             // We start by assigning the shapes to `Bucket`s.
@@ -104,12 +101,12 @@ impl BVH2dNode {
             // Compute the costs for each configuration and select the best configuration.
             let mut min_bucket = 0;
             let mut min_cost = f32::INFINITY;
-            let mut child_l_aabb = AABB::empty();
-            let mut child_r_aabb = AABB::empty();
+            let mut child_l_aabb = AABB::EMPTY;
+            let mut child_r_aabb = AABB::EMPTY;
             for i in 0..(NUM_BUCKETS - 1) {
                 let (l_buckets, r_buckets) = buckets.split_at(i + 1);
-                let child_l = l_buckets.iter().fold(Bucket::empty(), Bucket::join_bucket);
-                let child_r = r_buckets.iter().fold(Bucket::empty(), Bucket::join_bucket);
+                let child_l = l_buckets.iter().fold(Bucket::EMPTY, Bucket::join_bucket);
+                let child_r = r_buckets.iter().fold(Bucket::EMPTY, Bucket::join_bucket);
 
                 let cost = (child_l.size as f32 * child_l.aabb.surface_area()
                     + child_r.size as f32 * child_r.aabb.surface_area())
