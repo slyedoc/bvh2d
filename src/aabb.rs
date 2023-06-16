@@ -1,10 +1,14 @@
 use std::f32;
 
+#[cfg(feature = "serde")]
+use serde::{Serialize, Deserialize};
+
 use crate::{Point2, Vector2};
 
 use crate::axis::Axis;
 
 #[derive(Copy, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[allow(clippy::upper_case_acronyms)]
 pub struct AABB {
     pub min: Point2,

@@ -8,5 +8,9 @@ repository = "https://github.com/mockersf/bvh2d"
 documentation = "https://docs.rs/crate/bvh2d"
 license = "MIT"
 
+[features]
+serde = ["glam/serde", "dep:serde"]
+
 [dependencies]
 glam = "0.23"
+serde = { version = "1.0.164", features = ["derive"], optional = true }
