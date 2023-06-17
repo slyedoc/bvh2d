@@ -5,7 +5,11 @@ use crate::Point2;
 use crate::EPSILON;
 use std::f32;
 
+#[cfg(feature = "serde")]
+use serde::{Serialize, Deserialize};
+
 #[derive(Copy, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[allow(clippy::upper_case_acronyms)]
 pub(crate) enum BVH2dNode {
     Leaf {
@@ -151,6 +155,7 @@ impl BVH2dNode {
 }
 
 #[allow(clippy::upper_case_acronyms)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Clone, Debug)]
 pub struct BVH2d {
     pub(crate) nodes: Vec<BVH2dNode>,
