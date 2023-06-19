@@ -1,7 +1,7 @@
 use std::f32;
 
 #[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use crate::{Point2, Vector2};
 
